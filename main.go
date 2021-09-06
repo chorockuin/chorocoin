@@ -1,13 +1,19 @@
 package main
 
 import (
-	"github.com/chorockuin/chorocoin/blockchain"
+	"fmt"
+	"log"
+	"net/http"
 )
 
+const port string = ":4000"
+
+func home(rw http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(rw, "Hello from home!")
+}
+
 func main() {
-	chain := blockchain.GetBlockchain()
-	chain.Add_block("second_block")
-	chain.Add_block("third_block")
-	chain.Add_block("fourth_block")
-	chain.List_blocks()
+	http.HandleFunc("/", home)
+	fmt.Printf("Listening on http://localhost%s\n", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
