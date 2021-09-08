@@ -53,7 +53,7 @@ func GetBlockchain() *blockchain {
 	if b == nil {
 		once.Do(func() {
 			b = &blockchain{}
-			b.Add_block("genesis")
+			b.Add_block("Genesis")
 		})
 	}
 	return b
