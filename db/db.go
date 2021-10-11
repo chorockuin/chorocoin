@@ -1,8 +1,6 @@
 package db
 
 import (
-	"fmt"
-
 	"github.com/boltdb/bolt"
 	"github.com/chorockuin/chorocoin/utils"
 )
@@ -11,6 +9,7 @@ const (
 	dbName       = "blockchain.db"
 	dataBucket   = "data"
 	blocksBucket = "blocks"
+	checkpoint   = "checkpoint"
 )
 
 var db *bolt.DB
@@ -32,7 +31,7 @@ func DB() *bolt.DB {
 }
 
 func SaveBlock(hash string, data []byte) {
-	fmt.Printf("Saving Block %s\nData: %b", hash, data)
+	// fmt.Printf("Saving Block %s\nData: %b", hash, data)
 	err := DB().Update(func(t *bolt.Tx) error {
 		bucket := t.Bucket([]byte(blocksBucket))
 		err := bucket.Put([]byte(hash), data)
@@ -44,8 +43,18 @@ func SaveBlock(hash string, data []byte) {
 func SaveBlockchain(data []byte) {
 	err := DB().Update(func(t *bolt.Tx) error {
 		bucket := t.Bucket([]byte(dataBucket))
-		err := bucket.Put([]byte("checkpoint"), data)
+		err := bucket.Put([]byte(checkpoint), data)
 		return err
 	})
 	utils.HandleError(err)
+}
+
+func Checkpoint() []byte {
+	var data []byte
+	DB().View(func(t *bolt.Tx) error {
+		bucket := t.Bucket([]byte(dataBucket))
+		data = bucket.Get([]byte(checkpoint))
+		return nil
+	})
+	return data
 }
