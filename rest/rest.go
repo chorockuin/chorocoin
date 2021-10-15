@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/chorockuin/chorocoin/blockchain"
+	"github.com/chorockuin/chorocoin/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -64,14 +65,14 @@ func documentation(rw http.ResponseWriter, r *http.Request) {
 func blocks(rw http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		return
-		// json.NewEncoder(rw).Encode(blockchain.GetBlockchain().AllBlocks())
+		fmt.Println("GET")
+		json.NewEncoder(rw).Encode(blockchain.Blockchain().Blocks())
 	case "POST":
-		return
-		// var addBlockBody addBlockBody
-		// utils.HandleError(json.NewDecoder(r.Body).Decode(&addBlockBody))
-		// blockchain.GetBlockchain().Add_block(addBlockBody.Message)
-		// rw.WriteHeader(http.StatusCreated)
+		fmt.Println("POST")
+		var addBlockBody addBlockBody
+		utils.HandleError(json.NewDecoder(r.Body).Decode(&addBlockBody))
+		blockchain.Blockchain().AddBlock(addBlockBody.Message)
+		rw.WriteHeader(http.StatusCreated)
 	}
 }
 

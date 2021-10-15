@@ -38,6 +38,21 @@ func (bc *blockchain) AddBlock(data string) {
 	bc.persist()
 }
 
+func (bc *blockchain) Blocks() []*Block {
+	var blocks []*Block
+	hashCursor := bc.NewestHash
+	for {
+		block, _ := FindBlock(hashCursor)
+		blocks = append(blocks, block)
+		if block.PrevHash != "" {
+			hashCursor = block.PrevHash
+		} else {
+			break
+		}
+	}
+	return blocks
+}
+
 func Blockchain() *blockchain {
 	if bc == nil {
 		once.Do(func() {
