@@ -1,9 +1,7 @@
 package blockchain
 
 import (
-	"bytes"
 	"crypto/sha256"
-	"encoding/gob"
 	"fmt"
 	"sync"
 
@@ -21,39 +19,37 @@ type blockchain struct {
 	Height     int    `json:"height"`
 }
 
-var b *blockchain
+var bc *blockchain
 var once sync.Once
 
-func (b *blockchain) restore(data []byte) {
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	decoder.Decode(b)
+func (bc *blockchain) restore(data []byte) {
+	utils.FromBytes(bc, data)
 }
 
-func (b *blockchain) persist() {
-	db.SaveBlockchain(utils.ToBytes(b))
+func (bc *blockchain) persist() {
+	db.SaveBlockchain(utils.ToBytes(bc))
 }
 
-func (b *blockchain) AddBlock(data string) {
-	block := createBlock(data, b.NewestHash, b.Height+1)
-	b.NewestHash = block.Hash
-	b.Height = block.Height
-	fmt.Printf("AddBlock() NewestHash: %s\nHeight: %d\n", b.NewestHash, b.Height)
-	b.persist()
+func (bc *blockchain) AddBlock(data string) {
+	block := createBlock(data, bc.NewestHash, bc.Height+1)
+	bc.NewestHash = block.Hash
+	bc.Height = block.Height
+	fmt.Printf("AddBlock() NewestHash: %s\nHeight: %d\n", bc.NewestHash, bc.Height)
+	bc.persist()
 }
 
 func Blockchain() *blockchain {
-	if b == nil {
+	if bc == nil {
 		once.Do(func() {
-			b = &blockchain{"", 0}
-			fmt.Printf("Blockchain() NewestHash: %s\nHeight: %d\n", b.NewestHash, b.Height)
+			bc = &blockchain{"", 0}
 			checkpoint := db.Checkpoint()
 			if checkpoint == nil {
-				b.AddBlock("Genesis")
+				bc.AddBlock("Genesis")
 			} else {
-				b.restore(checkpoint)
+				bc.restore(checkpoint)
 			}
-			fmt.Printf("Blockchain() NewestHash: %s\nHeight: %d\n", b.NewestHash, b.Height)
 		})
 	}
-	return b
+	fmt.Println(bc.NewestHash)
+	return bc
 }

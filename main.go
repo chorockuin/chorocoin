@@ -1,11 +1,11 @@
 package main
 
-import "github.com/chorockuin/chorocoin/blockchain"
+import (
+	"github.com/chorockuin/chorocoin/blockchain"
+	"github.com/chorockuin/chorocoin/cli"
+)
 
 func main() {
-	// cli.Start()
-	// blockchain.Blockchain().AddBlock("First")
-	// blockchain.Blockchain().AddBlock("Second")
-	// blockchain.Blockchain().AddBlock("Third")
 	blockchain.Blockchain()
+	cli.Start()
 }

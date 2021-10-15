@@ -7,8 +7,8 @@ import (
 
 const (
 	dbName       = "blockchain.db"
-	dataBucket   = "data"
-	blocksBucket = "blocks"
+	dataBucket   = "data"   // k: "checkpoint" v:data(NewestHash string + Height int)
+	blocksBucket = "blocks" // k: hash, v:data(Data string + Hash string + PrevHash string + Height int)
 	checkpoint   = "checkpoint"
 )
 
@@ -54,6 +54,16 @@ func Checkpoint() []byte {
 	DB().View(func(t *bolt.Tx) error {
 		bucket := t.Bucket([]byte(dataBucket))
 		data = bucket.Get([]byte(checkpoint))
+		return nil
+	})
+	return data
+}
+
+func Block(hash string) []byte {
+	var data []byte
+	DB().View(func(t *bolt.Tx) error {
+		bucket := t.Bucket([]byte(blocksBucket))
+		data = bucket.Get([]byte(hash))
 		return nil
 	})
 	return data

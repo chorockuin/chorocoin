@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/chorockuin/chorocoin/blockchain"
-	"github.com/chorockuin/chorocoin/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -54,7 +52,7 @@ func documentation(rw http.ResponseWriter, r *http.Request) {
 			Payload:     "data:string",
 		},
 		{
-			url:         url("/blocks/{height}"),
+			url:         url("/blocks/{hash}"),
 			Method:      "GET",
 			Description: "Add A Block",
 			Payload:     "data:string",
@@ -66,20 +64,21 @@ func documentation(rw http.ResponseWriter, r *http.Request) {
 func blocks(rw http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		json.NewEncoder(rw).Encode(blockchain.GetBlockchain().AllBlocks())
+		return
+		// json.NewEncoder(rw).Encode(blockchain.GetBlockchain().AllBlocks())
 	case "POST":
-		var addBlockBody addBlockBody
-		utils.HandleError(json.NewDecoder(r.Body).Decode(&addBlockBody))
-		blockchain.GetBlockchain().Add_block(addBlockBody.Message)
-		rw.WriteHeader(http.StatusCreated)
+		return
+		// var addBlockBody addBlockBody
+		// utils.HandleError(json.NewDecoder(r.Body).Decode(&addBlockBody))
+		// blockchain.GetBlockchain().Add_block(addBlockBody.Message)
+		// rw.WriteHeader(http.StatusCreated)
 	}
 }
 
 func block(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	height, err := strconv.Atoi(vars["height"])
-	utils.HandleError(err)
-	block, err := blockchain.GetBlockchain().GetBlock(height)
+	hash := vars["hash"]
+	block, err := blockchain.FindBlock(hash)
 	encoder := json.NewEncoder(rw)
 	if err == blockchain.ErrNotFound {
 		encoder.Encode(errorResponse{fmt.Sprint(err)})
@@ -101,7 +100,7 @@ func Start(aPort int) {
 	router.Use(jsonContentTypeMiddleware)
 	router.HandleFunc("/", documentation).Methods("GET")
 	router.HandleFunc("/blocks", blocks).Methods("GET", "POST")
-	router.HandleFunc("/blocks/{height:[0-9]+}", block).Methods("GET")
+	router.HandleFunc("/blocks/{hash:[a-f0-9]+}", block).Methods("GET")
 	fmt.Printf("Listening on http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, router))
 }
